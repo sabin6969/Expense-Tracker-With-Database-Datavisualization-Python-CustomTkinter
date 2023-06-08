@@ -88,6 +88,7 @@ class ExpenseTracerApp:
             self.main_window_frame = ctk.CTkFrame(
                 logged_in_window, height=500, width=450)
             self.main_window_frame.place(x=150, y=0)
+            logged_in_window.title("Expense Tracer | Home")
             # Home Label
             home_label = ctk.CTkLabel(
                 self.main_window_frame, text="Welcome to Expense Tracer", font=("sans serif", 19, "bold"))
@@ -112,32 +113,38 @@ class ExpenseTracerApp:
             query_to_find_expense_this_month = f"select sum(expense_amount) from expenses where date_added between '{first_day}' and '{last_day}';"
             cursor.execute(query_to_find_max_expense)
             max_expense = cursor.fetchone()
+            cursor.reset()
             cursor.execute(query_to_find_min_expense)
             min_expense = cursor.fetchone()
-            # creating another cursor
-            # cursor2 = connection_with_indivisual_database.cursor()
-            # cursor2.execute(query_to_find_total_expense)
-            # total_expense_all_time = cursor2.fetchone()
-            # cursor2.execute(query_to_find_expense_this_month)
-            # expense_this_month = cursor2.fetchone()
-            # print("Max expense this in entire data ", max_expense)
-            # print("min expense this in entire data ", min_expense)
-            # print("total expenses ", total_expense_all_time)
-            # print("Max expense this in entire data ", expense_this_month)
+            cursor.reset()
+            cursor.execute(
+                query_to_find_total_expense)
+            total_expense_all_time = cursor.fetchone()
+            cursor.reset()
+            cursor.execute(
+                query_to_find_expense_this_month)
+            expense_this_month = cursor.fetchone()
+            cursor.reset()
             try:
-                # indexing empty tuple throws an error
-                max_expense_label = ctk.CTkLabel(
-                    self.main_window_frame, text=f"Your maximum expense is {max_expense[1]} and it is of {max_expense[0]} category")
-                max_expense_label.place(x=20, y=40)
-                min_expense_label = ctk.CTkLabel(
-                    self.main_window_frame, text=f"Your maximum expense is {min_expense[1]} and it is of {min_expense[0]} category")
-                min_expense_label.place(x=20, y=60)
+                if None not in (total_expense_all_time, expense_this_month):
+                    total_expense_all_time_label = ctk.CTkLabel(
+                        self.main_window_frame, text=f"Total Expense Recorded {total_expense_all_time[0]}", font=("sans serif", 15))
+                    total_expense_all_time_label.place(x=140, y=140)
+                    expense_this_month_label = ctk.CTkLabel(
+                        self.main_window_frame, text=f"Expense This Month {expense_this_month[0]}", font=("sans serif", 15))
+                    expense_this_month_label.place(x=140, y=165)
+                else:
+                    info2_label = ctk.CTkLabel(
+                        self.main_window_frame, text="Add Expenses to See snippet")
+                    info2_label.place(x=150, y=140)
+                    # Show this progress bar if user is new
+                    progress_bar = ctk.CTkProgressBar(
+                        self.main_window_frame, orientation="horizontal", mode="indeterminate")
+                    progress_bar.place(x=130, y=170)
+                    progress_bar.start()
             except:
-                info_label = ctk.CTkLabel(
-                    self.main_window_frame, text="Looks Like You are New User")
                 info2_label = ctk.CTkLabel(
                     self.main_window_frame, text="Add Expenses to See snippet")
-                info_label.place(x=150, y=120)
                 info2_label.place(x=150, y=140)
                 # Show this progress bar if user is new
                 progress_bar = ctk.CTkProgressBar(
@@ -153,6 +160,7 @@ class ExpenseTracerApp:
         def add_expense():
             # ---------Add Expense------------#
             self.main_window_frame.destroy()
+            logged_in_window.title("Expense Tracer | Add Expense")
             self.main_window_frame = ctk.CTkFrame(
                 logged_in_window, height=500, width=450)
             self.main_window_frame.place(x=150, y=0)
@@ -161,37 +169,37 @@ class ExpenseTracerApp:
             add_expense_label.place(x=160, y=5)
             expense_title_label = ctk.CTkLabel(
                 self.main_window_frame, text="Expense Title", font=("Futura", 12))
-            expense_title_label.place(x=10, y=40)
+            expense_title_label.place(x=40, y=40)
             expense_title_entry = ctk.CTkEntry(
                 self.main_window_frame, placeholder_text="Expense Title", width=160, corner_radius=5, height=10)
-            expense_title_entry.place(x=120, y=40)
+            expense_title_entry.place(x=150, y=40)
             select_date_label = ctk.CTkLabel(
                 self.main_window_frame, text="Select Date", font=("Futura", 12))
-            select_date_label.place(x=10, y=70)
+            select_date_label.place(x=40, y=70)
             date_picker = tkcalendar.DateEntry(
                 self.main_window_frame, width=21, height=30)
-            date_picker.place(x=150, y=90)
+            date_picker.place(x=190, y=90)
             # Expense Category label
             select_expense_category_label = ctk.CTkLabel(
                 self.main_window_frame, text="Select Category", font=("Futura", 12))
             select_expense_category_label.place(
-                x=10, y=100)
+                x=40, y=100)
             # Expense Category drop down
             expense_category_dropdown = ctk.CTkComboBox(
                 self.main_window_frame, width=160, values=["Rent", "Education", "Insurance", "Entertainment"], state="readonly")
             expense_category_dropdown.set("Rent")
-            expense_category_dropdown.place(x=120, y=100)
+            expense_category_dropdown.place(x=150, y=100)
             # Expense amount
             expense_amount_label = ctk.CTkLabel(
                 self.main_window_frame, text="Expense Amount", font=("Futura", 12))
-            expense_amount_label.place(x=10, y=140)
+            expense_amount_label.place(x=40, y=140)
             expense_amount_entry = ctk.CTkEntry(
-                self.main_window_frame, placeholder_text="Expense Amount", width=160, corner_radius=5)
-            expense_amount_entry.place(x=120, y=140)
+                self.main_window_frame, placeholder_text="Expense Amount", width=160, corner_radius=5, height=10)
+            expense_amount_entry.place(x=150, y=140)
             # submit expense details call back function
 
             def submit_expense_details():
-                submit_expense_details_button.place(x=120, y=180)
+                self.submit_expense_details_button.place(x=150, y=170)
                 expense_title = expense_title_entry.get()
                 date_of_expense_added = str(date_picker.get_date())
                 expense_category = expense_category_dropdown.get()
@@ -224,9 +232,9 @@ class ExpenseTracerApp:
                 except:
                     messagebox.showerror(
                         "Error", "Error While inserting data into database")
-            submit_expense_details_button = ctk.CTkButton(
-                self.main_window_frame, text="Add Expense", width=160, command=submit_expense_details)
-            submit_expense_details_button.place(x=120, y=180)
+            self.submit_expense_details_button = ctk.CTkButton(
+                self.main_window_frame, text="Add", width=160, command=submit_expense_details)
+            self.submit_expense_details_button.place(x=150, y=170)
             # ------------------End of add expense callback function------------------#
         add_expense_button = ctk.CTkButton(
             logged_in_window, text="Add Expense", width=140, bg_color="#8f98b5", command=add_expense)
@@ -364,7 +372,7 @@ class ExpenseTracerApp:
                             connection.ehlo()
                             connection.starttls()
                             connection.login(
-                                "example@gmail.com", "your_password_for_Email")
+                                "youremail@gmail.com", "yourpassword")
                             otp = ""
                             for i in range(4):
                                 otp += str(random.randrange(0, 9, 1))
