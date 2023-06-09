@@ -8,6 +8,7 @@ import random
 import pdb
 import tkcalendar
 from datetime import datetime, timedelta
+from tkinter import ttk
 
 
 class ExpenseTracerApp:
@@ -80,7 +81,7 @@ class ExpenseTracerApp:
         connection_with_indivisual_database = mysql.connector.connect(
             host="localhost", username="root", password="poudeL46@", database=f"{database_name}")
         option_frame = ctk.CTkFrame(
-            logged_in_window, height=500, width=150, fg_color="#8f98b5")
+            logged_in_window, height=500, width=150, fg_color="#0fffef")
         # Home button callback function
 
         def home():
@@ -91,8 +92,8 @@ class ExpenseTracerApp:
             logged_in_window.title("Expense Tracer | Home")
             # Home Label
             home_label = ctk.CTkLabel(
-                self.main_window_frame, text="Welcome to Expense Tracer", font=("sans serif", 19, "bold"))
-            home_label.place(x=100, y=5)
+                self.main_window_frame, text="Home", font=("sans serif", 19, "bold"))
+            home_label.place(x=210, y=5)
             # Your Expense at Glance labels
             # Getting Starting and ending date
             current_date = datetime.now()
@@ -111,12 +112,6 @@ class ExpenseTracerApp:
             query_to_find_min_expense = "select expense_category,expense_amount from expenses where expense_amount = (select min(expense_amount) from expenses);"
             query_to_find_total_expense = "select sum(expense_amount) from expenses;"
             query_to_find_expense_this_month = f"select sum(expense_amount) from expenses where date_added between '{first_day}' and '{last_day}';"
-            cursor.execute(query_to_find_max_expense)
-            max_expense = cursor.fetchone()
-            cursor.reset()
-            cursor.execute(query_to_find_min_expense)
-            min_expense = cursor.fetchone()
-            cursor.reset()
             cursor.execute(
                 query_to_find_total_expense)
             total_expense_all_time = cursor.fetchone()
@@ -126,17 +121,21 @@ class ExpenseTracerApp:
             expense_this_month = cursor.fetchone()
             cursor.reset()
             try:
-                if None not in (total_expense_all_time, expense_this_month):
+                if None not in total_expense_all_time or None not in expense_this_month:
                     total_expense_all_time_label = ctk.CTkLabel(
-                        self.main_window_frame, text=f"Total Expense Recorded {total_expense_all_time[0]}", font=("sans serif", 15))
-                    total_expense_all_time_label.place(x=140, y=140)
+                        self.main_window_frame, text=f"Your total expense recorded {total_expense_all_time[0]}", font=("sans serif", 15, "bold"))
+                    total_expense_all_time_label.place(x=110, y=140)
                     expense_this_month_label = ctk.CTkLabel(
-                        self.main_window_frame, text=f"Expense This Month {expense_this_month[0]}", font=("sans serif", 15))
-                    expense_this_month_label.place(x=140, y=165)
+                        self.main_window_frame, text=f"Your total expense this month {expense_this_month[0]}", font=("sans serif", 15, "bold"))
+                    expense_this_month_label.place(x=110, y=165)
+                    progress_bar = ctk.CTkProgressBar(
+                        self.main_window_frame, orientation="horizontal", mode="indeterminate")
+                    progress_bar.place(x=130, y=200)
+                    progress_bar.start()
                 else:
                     info2_label = ctk.CTkLabel(
-                        self.main_window_frame, text="Add Expenses to See snippet")
-                    info2_label.place(x=150, y=140)
+                        self.main_window_frame, text="Add Expenses to See snippet", font=("sans serif", 15))
+                    info2_label.place(x=135, y=140)
                     # Show this progress bar if user is new
                     progress_bar = ctk.CTkProgressBar(
                         self.main_window_frame, orientation="horizontal", mode="indeterminate")
@@ -144,7 +143,7 @@ class ExpenseTracerApp:
                     progress_bar.start()
             except:
                 info2_label = ctk.CTkLabel(
-                    self.main_window_frame, text="Add Expenses to See snippet")
+                    self.main_window_frame, text="Add Expenses to See snippet", font=("sans serif", 15))
                 info2_label.place(x=150, y=140)
                 # Show this progress bar if user is new
                 progress_bar = ctk.CTkProgressBar(
@@ -153,7 +152,7 @@ class ExpenseTracerApp:
                 progress_bar.start()
 
         home_button = ctk.CTkButton(
-            option_frame, text="Home", width=140, bg_color="#8f98b5", command=home)
+            option_frame, text="Home", width=140, bg_color="#0fffef", command=home)
         home_button.place(x=5, y=5)
         # ---------------Add Expense Callback function-----------------------#
 
@@ -186,7 +185,7 @@ class ExpenseTracerApp:
                 x=40, y=100)
             # Expense Category drop down
             expense_category_dropdown = ctk.CTkComboBox(
-                self.main_window_frame, width=160, values=["Rent", "Education", "Insurance", "Entertainment"], state="readonly")
+                self.main_window_frame, width=160, values=["Rent", "Education", "Insurance", "Entertainment", "Other"], state="readonly")
             expense_category_dropdown.set("Rent")
             expense_category_dropdown.place(x=150, y=100)
             # Expense amount
@@ -224,7 +223,10 @@ class ExpenseTracerApp:
                         cursor.execute(query)
                         connection_with_indivisual_database.commit()
                         messagebox.showinfo(
-                            "Sucess", "Added into database Sucessfully")
+                            "Sucess", "Record Inserted Sucessfully")
+                        expense_title_entry.delete(0, ctk.END)
+                        expense_amount_entry.delete(0, ctk.END)
+
                 except ValueError:
                     messagebox.showerror(
                         "Error", "Number is expected in amount field")
@@ -237,17 +239,77 @@ class ExpenseTracerApp:
             self.submit_expense_details_button.place(x=150, y=170)
             # ------------------End of add expense callback function------------------#
         add_expense_button = ctk.CTkButton(
-            logged_in_window, text="Add Expense", width=140, bg_color="#8f98b5", command=add_expense)
+            logged_in_window, text="Add Expense", width=140, bg_color="#0fffef", command=add_expense)
         add_expense_button.place(x=5, y=65)
         visualize_expense_button = ctk.CTkButton(
-            logged_in_window, text="Visualize Expense", width=140, bg_color="#8f98b5")
+            logged_in_window, text="Visualize Expense", width=140, bg_color="#0fffef")
         visualize_expense_button.place(x=5, y=125)
+        # Delete Expense Call Back function
+
+        def delete_expense():
+            self.main_window_frame.destroy()
+            logged_in_window.title("Expense Tracer | Delete Expense")
+            self.main_window_frame = ctk.CTkFrame(
+                logged_in_window, height=500, width=450)
+            self.main_window_frame.place(x=150, y=0)
+            delete_expense_label = ctk.CTkLabel(
+                self.main_window_frame, text="Delete Expense", font=("sans serif", 19, "bold"))
+            delete_expense_label.place(x=160, y=5)
+            # Search expense by Category
+            search_expense_by_category_label = ctk.CTkLabel(
+                self.main_window_frame, text="Search Expense by Category")
+            search_expense_by_category_label.place(x=160, y=40)
+            search_by_category_combobox = ctk.CTkComboBox(self.main_window_frame, width=160, values=[
+                                                          "Rent", "Education", "Insurance", "Entertainment", "Other"], state="readonly")
+            search_by_category_combobox.set("Rent")
+            search_by_category_combobox.place(x=160, y=70)
+
+        # End of Delete Expense Callback function
         delete_expense_button = ctk.CTkButton(
-            logged_in_window, text="Delete Expense", width=140, bg_color="#8f98b5")
+            logged_in_window, text="Delete Expense", width=140, bg_color="#0fffef", command=delete_expense)
         delete_expense_button.place(x=5, y=185)
         self.main_window_frame = ctk.CTkFrame(
             logged_in_window, height=500, width=450)
         self.main_window_frame.place(x=150, y=0)
+
+        def show_all_expense_log():
+            self.main_window_frame.destroy()
+            logged_in_window.title("Expense Trace | Expense Log")
+            self.main_window_frame = ctk.CTkFrame(
+                logged_in_window, height=500, width=450)
+            self.main_window_frame.place(x=150, y=0)
+            your_expense_log_label = ctk.CTkLabel(
+                self.main_window_frame, text="Your Expense Log", font=("sans serif", 19, "bold"))
+            your_expense_log_label.place(x=150, y=5)
+            tree = ttk.Treeview(self.main_window_frame, height=25, columns=(
+                "Title", "Date", "Category", "Amount"))
+            tree.column("#0", width=0)
+            tree.column("Title", width=140)
+            tree.column("Date", width=120)
+            tree.column("Category", width=125)
+            tree.column("Amount", width=120)
+            tree.heading("Title", text="Title")
+            tree.heading("Date", text="Date")
+            tree.heading("Category", text="Category")
+            tree.heading("Amount", text="Amount")
+            tree.place(x=20, y=50)
+            cursor = connection_with_indivisual_database.cursor()
+            query = "select * from expenses;"
+            cursor.execute(query)
+            rows = cursor.fetchall()
+            cursor.reset()
+            sum = 0
+            for row in rows:
+                tree.insert("", "end", text="", values=(
+                    row[0], row[1], row[2], row[3]))
+                sum += row[3]
+            else:
+                row = ["", "", "Total Amount-->", f"{sum}"]
+                tree.insert("", "end", text="", values=(
+                    row[0], row[1], row[2], row[3]))
+        show_all_expense_log_button = ctk.CTkButton(
+            option_frame, text="Show All Expense Log", command=show_all_expense_log)
+        show_all_expense_log_button.place(x=5, y=245)
         option_frame.place(x=0, y=0)
         logged_in_window.mainloop()
 
@@ -372,12 +434,12 @@ class ExpenseTracerApp:
                             connection.ehlo()
                             connection.starttls()
                             connection.login(
-                                "youremail@gmail.com", "yourpassword")
+                                "yourmail@exampl.com", "your_password")
                             otp = ""
                             for i in range(4):
                                 otp += str(random.randrange(0, 9, 1))
                             connection.sendmail(
-                                "ilovepython46@gmail.com", f"{entered_mail}", f"Subject: Regarding OTP \n\nYour One time Password is {otp}\nDo not share it with others\nif you have not requested for otp ignore it")
+                                "yourmail@example.com", f"{entered_mail}", f"Subject: Regarding OTP \n\nYour One time Password is {otp}\nDo not share it with others\nif you have not requested for otp ignore it")
 
                         except:
                             messagebox.showerror(
