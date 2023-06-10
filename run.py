@@ -9,6 +9,8 @@ import pdb
 import tkcalendar
 from datetime import datetime, timedelta
 from tkinter import ttk
+import matplotlib.pyplot as plt
+import warnings
 
 
 class ExpenseTracerApp:
@@ -241,8 +243,67 @@ class ExpenseTracerApp:
         add_expense_button = ctk.CTkButton(
             logged_in_window, text="Add Expense", width=140, bg_color="#0fffef", command=add_expense)
         add_expense_button.place(x=5, y=65)
+
+        def visualize_expense():
+            self.main_window_frame.destroy()
+            warnings.filterwarnings("ignore")
+            logged_in_window.title("Expense Tracer | Visualize Expense")
+            self.main_window_frame = ctk.CTkFrame(
+                logged_in_window, height=500, width=450)
+            self.main_window_frame.place(x=150, y=0)
+            categories = ["Rent", "Education",
+                          "Insurance", "Entertainment", "Other"]
+            cursor = connection_with_indivisual_database.cursor()
+            expenses = []
+            query_to_find_total_expense_in_rent = "select sum(expense_amount) from expenses where expense_category='Rent';"
+            cursor.execute(query_to_find_total_expense_in_rent)
+            rent_expense = cursor.fetchone()
+            cursor.reset()
+            expenses.append(rent_expense)
+            query_to_find_total_expense_in_education = "select sum(expense_amount) from expenses where expense_category='Education';"
+            cursor.execute(query_to_find_total_expense_in_education)
+            education_expense = cursor.fetchone()
+            cursor.reset()
+            expenses.append(education_expense)
+            query_to_find_total_expense_insurance = "select sum(expense_amount) from expenses where expense_category='insurance';"
+            cursor.execute(query_to_find_total_expense_insurance)
+            insurance_expense = cursor.fetchone()
+            cursor.reset()
+            expenses.append(insurance_expense)
+            query_to_find_total_expense_in_entertainment = "select sum(expense_amount) from expenses where expense_category='Entertainment';"
+            cursor.execute(query_to_find_total_expense_in_entertainment)
+            entertainment_expense = cursor.fetchone()
+            cursor.reset()
+            expenses.append(entertainment_expense)
+            query_to_find_total_expense_in_others = "select sum(expense_amount) from expenses where expense_category='Other';"
+            cursor.execute(query_to_find_total_expense_in_others)
+            other_expenses = cursor.fetchone()
+            expenses.append(other_expenses)
+            expense_amount_only = [i[0] for i in expenses]
+            try:
+                plt.figure(figsize=(4, 4))
+                plt.pie(expense_amount_only, labels=categories,
+                        autopct='%1.1f%%', startangle=90)
+                plt.axis('equal')
+                plt.title('Expense Distribution')
+                # Save the pie chart as an image
+                plt.savefig('expense_pie_chart.png', dpi=100)
+                plt.close()
+                image = tk.PhotoImage(file="expense_pie_chart.png")
+                image_label = ctk.CTkLabel(self.main_window_frame, image=image)
+                image_label.place(x=40, y=40)
+            except:
+                info2_label = ctk.CTkLabel(
+                    self.main_window_frame, text="Add expenses of all category to visualize", font=("sans serif", 15))
+                info2_label.place(x=110, y=140)
+                progress_bar = ctk.CTkProgressBar(
+                    self.main_window_frame, orientation="horizontal", mode="indeterminate")
+                progress_bar.place(x=135, y=170)
+                progress_bar.start()
+
+            # -----------------End of Visualize Expense function------------#
         visualize_expense_button = ctk.CTkButton(
-            logged_in_window, text="Visualize Expense", width=140, bg_color="#0fffef")
+            logged_in_window, text="Visualize Expense", width=140, bg_color="#0fffef", command=visualize_expense)
         visualize_expense_button.place(x=5, y=125)
         # Delete Expense Call Back function
 
@@ -434,13 +495,12 @@ class ExpenseTracerApp:
                             connection.ehlo()
                             connection.starttls()
                             connection.login(
-                                "yourmail@exampl.com", "your_password")
+                                "example@gmail.com", "your_app_password")
                             otp = ""
                             for i in range(4):
                                 otp += str(random.randrange(0, 9, 1))
                             connection.sendmail(
-                                "yourmail@example.com", f"{entered_mail}", f"Subject: Regarding OTP \n\nYour One time Password is {otp}\nDo not share it with others\nif you have not requested for otp ignore it")
-
+                                "example@gmail.com", f"{entered_mail}", f"Subject: Regarding OTP \n\nYour One time Password is {otp}\nDo not share it with others\nif you have not requested for otp ignore it")
                         except:
                             messagebox.showerror(
                                 "Failed to Mail", "Failed to Send Mail Check Your internet Status")
