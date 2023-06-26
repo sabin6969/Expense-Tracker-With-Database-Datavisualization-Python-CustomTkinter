@@ -495,12 +495,13 @@ class ExpenseTracerApp:
                             connection.ehlo()
                             connection.starttls()
                             connection.login(
-                                "example@gmail.com", "your_app_password")
+                                "youremail@gmail.com", "passwordforthatemail")
                             otp = ""
                             for i in range(4):
                                 otp += str(random.randrange(0, 9, 1))
                             connection.sendmail(
-                                "example@gmail.com", f"{entered_mail}", f"Subject: Regarding OTP \n\nYour One time Password is {otp}\nDo not share it with others\nif you have not requested for otp ignore it")
+                                "youremail@gmail.com", f"{entered_mail}", f"Subject: Regarding OTP \n\nYour One time Password is {otp}\nDo not share it with others\nif you have not requested for otp ignore it")
+
                         except:
                             messagebox.showerror(
                                 "Failed to Mail", "Failed to Send Mail Check Your internet Status")
@@ -520,7 +521,6 @@ class ExpenseTracerApp:
                             self.create_account_button = ctk.CTkButton(
                                 self.landing_window, text="Create Account", width=170, command=create_account)
                             self.create_account_button.place(x=250, y=170)
-
                 else:
                     messagebox.showerror("Required", "Email is Required")
             else:
@@ -532,26 +532,29 @@ class ExpenseTracerApp:
         verify_email_button = ctk.CTkButton(
             self.landing_window, text="verify", width=40, command=verify)
         verify_email_button.place(x=400, y=50)
-    # ------------------Bug to be resolved -------------------------------------------------------------------------------#
 
     def login_after_account_creation(self):
-        user_entered_mail = self.email_entry.get()
-        cursor = self.connection.cursor()
-        query = f"Select db_name from registered_users where email='{user_entered_mail}' "
-        cursor.execute(query)
-        database_to_be_created = cursor.fetchone()[0]
-        query = f"create database {database_to_be_created}"
-        cursor.execute(query)
-        self.connection.commit()
         try:
+            user_entered_mail = self.email_entry.get()
+            cursor = self.connection.cursor()
+            query = f"Select db_name from registered_users where email='{user_entered_mail}' "
+            cursor.execute(query)
+            database_to_be_created = cursor.fetchone()[0]
+            query = f"create database {database_to_be_created}"
+            cursor.execute(query)
+            self.connection.commit()
             self.connection_with_new_db = mysql.connector.connect(
                 host="localhost", user="root", password="poudeL46@", database=f"{database_to_be_created}")
             query_to_create_new_table = 'create table expenses (expense_title_entry varchar(255), date_added date, expense_category varchar(20),expense_amount int);'
             cursor = self.connection_with_new_db.cursor()
             cursor.execute(query_to_create_new_table)
             self.connection_with_new_db.commit()
+            self.landing_window.destroy()
+            self.login_sucess(user_entered_mail)
         except:
             messagebox.showinfo("Login", "You can now login into your account")
+            self.landing_window.destroy()
+            self.login_sucess(user_entered_mail)
 
 
 if __name__ == "__main__":
